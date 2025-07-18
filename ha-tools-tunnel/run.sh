@@ -2,6 +2,10 @@
 
 CONFIG_PATH=/data/frpc.yaml
 
+export SERVER_ADDR="${SERVER_ADDR}"
+export SERVER_PORT="${SERVER_PORT}"
+export SUBDOMAIN="${SUBDOMAIN}"
+
 # Debug: Zeige Umgebungsvariablen
 echo "FRPC wird gestartet mit:"
 echo "  server_addr: $SERVER_ADDR"
