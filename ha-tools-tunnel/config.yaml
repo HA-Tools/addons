@@ -1,5 +1,5 @@
 name: "FRPC Tunnel Client"
-version: "1.0.6"
+version: "1.0.7"
 slug: "frpc_tunnel"
 description: "Ermöglicht eine sichere Verbindung zu einem FRP-Server für Remote-Zugriff auf Home Assistant."
 startup: services
@@ -7,9 +7,9 @@ boot: auto
 init: false
 ingress: false
 options:
-  server_addr: "ha-cloud.example.com"
+  server_addr: "dein-server.de"
   server_port: 7000
-  subdomain: "ha-meinname"
+  subdomain: "kunde1"
 schema:
   server_addr: str
   server_port: int
