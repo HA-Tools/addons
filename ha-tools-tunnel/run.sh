@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Teste Erreichbarkeit von HA:"
+if ! curl -fsI http://localhost:8123; then
+  echo "ERROR: Kann Home Assistant auf localhost:8123 nicht erreichen!"
+  exit 1
+fi
+
 OPTIONS_FILE=/data/options.json
 
 # 1) Optionen aus JSON holen
