@@ -8,19 +8,20 @@ init: false
 ingress: false
 
 options:
-  server_addr: "ha-cloud.example.com"
-  server_port: 7000
-  subdomain: "kunde1"
+  SERVER_ADDR: "ha-cloud.example.com"
+  SERVER_PORT: 7000
+  SUBDOMAIN: "kunde1"
 
 schema:
-  server_addr: str
-  server_port: int
-  subdomain: str
+  SERVER_ADDR: str
+  SERVER_PORT: int
+  SUBDOMAIN: str
 
 environment:
-  SERVER_ADDR: $server_addr
-  SERVER_PORT: $server_port
-  SUBDOMAIN: $subdomain
+  SERVER_ADDR: $SERVER_ADDR
+  SERVER_PORT: $SERVER_PORT
+  SUBDOMAIN: $SUBDOMAIN
+
 arch:
   - aarch64
   - amd64
