@@ -1,7 +1,7 @@
-name: "FRPC Tunnel Client"
-version: "1.0.11"
+name: "HA-Tools Tunnel"
+version: "1.0.12"
 slug: "frpc_tunnel"
-description: "Reverse-Tunnel zu deinem eigenen FRP-Server (frpc via YAML)"
+description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
 boot: auto
 init: false
