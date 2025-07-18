@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache curl tar bash
+RUN apk add --no-cache curl tar bash gettext
 
 ENV FRP_VERSION=0.58.0
 
@@ -10,7 +10,7 @@ RUN curl -L -o frp.tar.gz https://github.com/fatedier/frp/releases/download/v${F
     && mv frp_${FRP_VERSION}_linux_amd64/frpc /usr/local/bin/frpc \
     && rm -rf frp*
 
-# Add-on Dateien kopieren
+# Dateien kopieren
 COPY run.sh /run.sh
 COPY frpc.ini.j2 /frpc.ini.j2
 
