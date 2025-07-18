@@ -4,6 +4,22 @@ set -euo pipefail
 OPTIONS_FILE=/data/options.json
 CONFIG_PATH=/data/frpc.yaml
 
+# 1) Port‑Erkennung: Suche in /config/configuration.yaml unter http: → server_port
+DEFAULT_PORT=8123
+LOCAL_PORT=$DEFAULT_PORT
+if [ -f /config/configuration.yaml ]; then
+  # Nimm die erste Zeile "server_port: <Zahl>" im http‑Block
+  DETECTED=$(awk '
+    $1=="http:" { in_http=1 }
+    in_http && $1=="server_port:" { print $2; exit }
+  ' /config/configuration.yaml | tr -d "\"")
+  if [[ $DETECTED =~ ^[0-9]+$ ]]; then
+    LOCAL_PORT=$DETECTED
+  fi
+fi
+
+echo "Gefundener HA‑Port: $LOCAL_PORT (Fallback: $DEFAULT_PORT)"
+
 # 1) Optionen aus JSON holen
 SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS_FILE")
 SERVER_PORT=$(jq -r '.server_port' "$OPTIONS_FILE")
@@ -23,7 +39,7 @@ proxies:
   - name: ha-ui
     type: http
     localIp: "127.0.0.1"
-    localPort: 8123
+    localPort: $LOCAL_PORT
     customDomains:
       - "${SUBDOMAIN}.${SERVER_ADDR}"
     hostHeaderRewrite: "${SUBDOMAIN}.${SERVER_ADDR}"
