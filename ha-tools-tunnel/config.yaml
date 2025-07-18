@@ -1,5 +1,5 @@
 name: "FRPC Tunnel Client"
-version: "1.0.2"
+version: "1.0.3"
 slug: "frpc_tunnel"
 description: "Ermöglicht eine sichere Verbindung zu einem FRP-Server für Remote-Zugriff auf Home Assistant."
 startup: services
@@ -15,8 +15,6 @@ schema:
   server_port: int
   subdomain: str
 arch:
+  - x86_64
   - aarch64
-  - amd64
-  - armhf
-  - armv7
-  - i386
+  - armv7l
