@@ -1,19 +1,16 @@
 #!/bin/bash
 
-CONFIG_PATH=/data/frpc.ini
+CONFIG_PATH=/data/frpc.yaml
 
-# Hole Variablen von Add-on-Options (Home Assistant setzt diese als Umgebungsvariablen)
-export server_addr="$SERVER_ADDR"
-export server_port="$SERVER_PORT"
-export subdomain="$SUBDOMAIN"
+# Debug: Zeige Umgebungsvariablen
+echo "FRPC wird gestartet mit:"
+echo "  server_addr: $SERVER_ADDR"
+echo "  server_port: $SERVER_PORT"
+echo "  subdomain:   $SUBDOMAIN"
 
-echo "Generiere frpc.ini mit:"
-echo "  server_addr: $server_addr"
-echo "  server_port: $server_port"
-echo "  subdomain:   $subdomain"
+# Template verarbeiten
+export SERVER_ADDR SERVER_PORT SUBDOMAIN
+envsubst < /frpc.yaml.j2 > $CONFIG_PATH
 
-# Erzeuge Konfiguration
-envsubst < /frpc.ini.j2 > $CONFIG_PATH
-
-# Starte frpc
+# Start
 exec frpc -c $CONFIG_PATH
