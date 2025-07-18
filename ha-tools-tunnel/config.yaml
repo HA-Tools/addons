@@ -1,5 +1,5 @@
 name: "HA-Tools Tunnel"
-version: "1.0.15"
+version: "1.0.16"
 slug: "frpc_tunnel"
 description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
@@ -16,11 +16,6 @@ schema:
   server_addr: str
   server_port: int
   subdomain: str
-
-environment:
-  SERVER_ADDR: $server_addr
-  SERVER_PORT: $server_port
-  SUBDOMAIN: $subdomain
 
 arch:
   - aarch64
