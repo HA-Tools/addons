@@ -1,49 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 1) Kandidaten‑Liste definieren (füge Ports hinzu, die du prüfen willst)
-CANDIDATE_PORTS=(8123 443 80 8080 8243)
+OPTIONS_FILE=/data/options.json
+CONFIG_PATH=/data/frpc.yaml
+
+# 1) Port‑Erkennung via grep
 DEFAULT_PORT=8123
 LOCAL_PORT=$DEFAULT_PORT
-
-echo "Versuche, Home Assistant‑Port via curl zu entdecken…"
-
-for p in "${CANDIDATE_PORTS[@]}"; do
-  # Wähle Protokoll: Port 443 per HTTPS, der Rest per HTTP
-  if [ "$p" -eq 443 ]; then
-    proto="https"
-  else
-    proto="http"
+if [ -f /config/configuration.yaml ]; then
+  DETECTED=$(grep -E '^[[:space:]]*server_port:[[:space:]]*[0-9]+' /config/configuration.yaml \
+             | head -n1 \
+             | sed -E 's/^[[:space:]]*server_port:[[:space:]]*([0-9]+).*/\1/')
+  if [[ $DETECTED =~ ^[0-9]+$ ]]; then
+    LOCAL_PORT=$DETECTED
   fi
-
-  # HEAD‑Request mit kurzer Timeout‑Zeit
-  status=$(curl -sI --connect-timeout 1 "$proto://localhost:$p" \
-           | head -n1 \
-           | awk '{print $2}')
-  # Akzeptiere 200, 401 (Token-Required), 405 (Method Not Allowed)
-  if [[ "$status" =~ ^(200|401|405)$ ]]; then
-    LOCAL_PORT=$p
-    echo "→ Home Assistant gefunden auf Port $p (HTTP-Status $status)"
-    break
-  fi
-done
-
-echo "Gefundener HA‑Port: $LOCAL_PORT (Fallback: $DEFAULT_PORT)"
+fi
+echo "Gefundener HA‑Port: $LOCAL_PORT (Fallback: 8123)"
 
 # 2) Optionen aus JSON holen
-OPTIONS=/data/options.json
-SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS")
-SERVER_PORT=$(jq -r '.server_port' "$OPTIONS")
-TOKEN=$(jq -r '.token'       "$OPTIONS")
-SUBDOMAIN=$(jq -r '.subdomain' "$OPTIONS")
+SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS_FILE")
+SERVER_PORT=$(jq -r '.server_port' "$OPTIONS_FILE")
+TOKEN=$(jq -r '.token'       "$OPTIONS_FILE")
+SUBDOMAIN=$(jq -r '.subdomain' "$OPTIONS_FILE")
 
 echo "Starte FRPC mit:"
 echo "  Server:    $SERVER_ADDR:$SERVER_PORT"
 echo "  Token:     $TOKEN"
 echo "  Subdomain: $SUBDOMAIN"
+echo "  LocalPort: $LOCAL_PORT"
 
-# 3) frpc.yaml generieren
-cat > /data/frpc.yaml <<EOF
+# 3) frpc.yaml erzeugen
+cat > "$CONFIG_PATH" <<EOF
 common:
   server_addr: $SERVER_ADDR
   server_port: $SERVER_PORT
@@ -61,8 +48,8 @@ proxies:
 EOF
 
 echo "-------- frpc.yaml --------"
-cat /data/frpc.yaml
+cat "$CONFIG_PATH"
 echo "---------------------------"
 
-# 4) FRPC starten
-exec frpc -c /data/frpc.yaml
+# 4) frpc starten
+exec frpc -c "$CONFIG_PATH"
