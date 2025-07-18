@@ -1,5 +1,5 @@
 name: "HA-Tools Tunnel"
-version: "1.0.13"
+version: "1.0.14"
 slug: "frpc_tunnel"
 description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
@@ -18,9 +18,11 @@ schema:
   subdomain: str
 
 environment:
-  SERVER_ADDR: $server_addr
-  SERVER_PORT: $server_port
-  SUBDOMAIN: $subdomain
+  # links: Name der env‑Var im Container
+  # rechts: referenziert deine options oben
+  SERVER_ADDR: "${server_addr}"
+  SERVER_PORT: "${server_port}"
+  SUBDOMAIN: "${subdomain}"
 
 arch:
   - aarch64
