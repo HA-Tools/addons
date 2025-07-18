@@ -32,6 +32,7 @@ proxies:
     localPort: 8123
     customDomains:
       - "${SUBDOMAIN}.${SERVER_ADDR}"
+    host_header_rewrite: "${SUBDOMAIN}.${SERVER_ADDR}"
 EOF
 
 echo "-------- Generierte frpc.yaml --------"
