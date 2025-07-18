@@ -1,8 +1,8 @@
 [common]
-server_addr = {{ server_addr }}
-server_port = {{ server_port }}
+server_addr = $server_addr
+server_port = $server_port
 
 [ha-ui]
 type = http
 local_port = 8123
-custom_domains = {{ subdomain }}.{{ server_addr }}
+custom_domains = $subdomain.$server_addr
