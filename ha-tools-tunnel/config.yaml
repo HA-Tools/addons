@@ -1,5 +1,5 @@
 name: "FRPC Tunnel Client"
-version: "1.0.9"
+version: "1.0.10"
 slug: "frpc_tunnel"
 description: "Reverse-Tunnel zu deinem eigenen FRP-Server (frpc via YAML)"
 startup: services
