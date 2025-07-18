@@ -7,12 +7,12 @@ CONFIG_PATH=/data/frpc.yaml
 # 1) Port‑Erkennung: Suche in /config/configuration.yaml unter http: → server_port
 DEFAULT_PORT=8123
 LOCAL_PORT=$DEFAULT_PORT
+
 if [ -f /config/configuration.yaml ]; then
-  # Nimm die erste Zeile "server_port: <Zahl>" im http‑Block
-  DETECTED=$(awk '
-    $1=="http:" { in_http=1 }
-    in_http && $1=="server_port:" { print $2; exit }
-  ' /config/configuration.yaml | tr -d "\"")
+  # Suche überall nach "server_port: <Zahl>" und nimm die erste gefundene
+  DETECTED=$(grep -E '^[[:space:]]*server_port:[[:space:]]*[0-9]+' /config/configuration.yaml \
+             | head -n1 \
+             | sed -E 's/^[[:space:]]*server_port:[[:space:]]*([0-9]+).*/\1/')
   if [[ $DETECTED =~ ^[0-9]+$ ]]; then
     LOCAL_PORT=$DETECTED
   fi
