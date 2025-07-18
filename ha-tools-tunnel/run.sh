@@ -1,39 +1,54 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OPTIONS_FILE=/data/options.json
-CONFIG_PATH=/data/frpc.yaml
-
-# 1) Port‑Erkennung: Suche in /config/configuration.yaml unter http: → server_port
+# 1) Kandidaten‑Liste definieren (füge Ports hinzu, die du prüfen willst)
+CANDIDATE_PORTS=(8123 443 80 8080 8243)
 DEFAULT_PORT=8123
 LOCAL_PORT=$DEFAULT_PORT
 
-if [ -f /config/configuration.yaml ]; then
-  # Suche überall nach "server_port: <Zahl>" und nimm die erste gefundene
-  DETECTED=$(grep -E '^[[:space:]]*server_port:[[:space:]]*[0-9]+' /config/configuration.yaml \
-             | head -n1 \
-             | sed -E 's/^[[:space:]]*server_port:[[:space:]]*([0-9]+).*/\1/')
-  if [[ $DETECTED =~ ^[0-9]+$ ]]; then
-    LOCAL_PORT=$DETECTED
+echo "Versuche, Home Assistant‑Port via curl zu entdecken…"
+
+for p in "${CANDIDATE_PORTS[@]}"; do
+  # Wähle Protokoll: Port 443 per HTTPS, der Rest per HTTP
+  if [ "$p" -eq 443 ]; then
+    proto="https"
+  else
+    proto="http"
   fi
-fi
+
+  # HEAD‑Request mit kurzer Timeout‑Zeit
+  status=$(curl -sI --connect-timeout 1 "$proto://localhost:$p" \
+           | head -n1 \
+           | awk '{print $2}')
+  # Akzeptiere 200, 401 (Token-Required), 405 (Method Not Allowed)
+  if [[ "$status" =~ ^(200|401|405)$ ]]; then
+    LOCAL_PORT=$p
+    echo "→ Home Assistant gefunden auf Port $p (HTTP-Status $status)"
+    break
+  fi
+done
 
 echo "Gefundener HA‑Port: $LOCAL_PORT (Fallback: $DEFAULT_PORT)"
 
-# 1) Optionen aus JSON holen
-SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS_FILE")
-SERVER_PORT=$(jq -r '.server_port' "$OPTIONS_FILE")
-SUBDOMAIN=$(jq -r '.subdomain'   "$OPTIONS_FILE")
+# 2) Optionen aus JSON holen
+OPTIONS=/data/options.json
+SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS")
+SERVER_PORT=$(jq -r '.server_port' "$OPTIONS")
+TOKEN=$(jq -r '.token'       "$OPTIONS")
+SUBDOMAIN=$(jq -r '.subdomain' "$OPTIONS")
 
-echo "FRPC wird gestartet mit:"
-echo "  SERVER_ADDR: $SERVER_ADDR"
-echo "  SERVER_PORT: $SERVER_PORT"
-echo "  SUBDOMAIN:   $SUBDOMAIN"
+echo "Starte FRPC mit:"
+echo "  Server:    $SERVER_ADDR:$SERVER_PORT"
+echo "  Token:     $TOKEN"
+echo "  Subdomain: $SUBDOMAIN"
 
-# 2) frpc.yaml via Here‑Doc schreiben
-cat > "$CONFIG_PATH" <<EOF
-serverAddr: "${SERVER_ADDR}"
-serverPort: ${SERVER_PORT}
+# 3) frpc.yaml generieren
+cat > /data/frpc.yaml <<EOF
+common:
+  server_addr: $SERVER_ADDR
+  server_port: $SERVER_PORT
+  token:       $TOKEN
+  tls_enable:  true
 
 proxies:
   - name: ha-ui
@@ -41,13 +56,13 @@ proxies:
     localIp: "127.0.0.1"
     localPort: $LOCAL_PORT
     customDomains:
-      - "${SUBDOMAIN}.${SERVER_ADDR}"
-    hostHeaderRewrite: "${SUBDOMAIN}.${SERVER_ADDR}"
+      - "${SUBDOMAIN}.ui.ha-tools.com"
+    hostHeaderRewrite: "${SUBDOMAIN}.ui.ha-tools.com"
 EOF
 
-echo "-------- Generierte frpc.yaml --------"
-cat "$CONFIG_PATH"
-echo "--------------------------------------"
+echo "-------- frpc.yaml --------"
+cat /data/frpc.yaml
+echo "---------------------------"
 
-# 3) frpc starten
-exec frpc -c "$CONFIG_PATH"
+# 4) FRPC starten
+exec frpc -c /data/frpc.yaml
