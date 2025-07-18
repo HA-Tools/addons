@@ -1,18 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
-CONFIG_PATH=/data/frpc.yaml
+OPTIONS_FILE=/data/options.json
+
+# 1) Optionen aus JSON holen
+SERVER_ADDR=$(jq -r '.server_addr' "$OPTIONS_FILE")
+SERVER_PORT=$(jq -r '.server_port' "$OPTIONS_FILE")
+SUBDOMAIN=$(jq -r '.subdomain' "$OPTIONS_FILE")
 
 echo "FRPC wird gestartet mit:"
 echo "  SERVER_ADDR: $SERVER_ADDR"
 echo "  SERVER_PORT: $SERVER_PORT"
 echo "  SUBDOMAIN:   $SUBDOMAIN"
 
-# Ersetze nur diese drei Variablen – so bleibt nichts übrig
-envsubst '$SERVER_ADDR $SERVER_PORT $SUBDOMAIN' < /frpc.yaml.j2 > $CONFIG_PATH
+# 2) frpc.yaml generieren
+CONFIG_PATH=/data/frpc.yaml
+cat > "$CONFIG_PATH" <<EOF
+serverAddr: "${SERVER_ADDR}"
+serverPort: ${SERVER_PORT}
+
+proxies:
+  - name: ha-ui
+    type: http
+    localPort: 8123
+    customDomains:
+      - "${SUBDOMAIN}.${SERVER_ADDR}"
+EOF
 
 echo "-------- Generierte frpc.yaml --------"
-cat $CONFIG_PATH
+cat "$CONFIG_PATH"
 echo "--------------------------------------"
 
-exec frpc -c $CONFIG_PATH
+# 3) frpc starten
+exec frpc -c "$CONFIG_PATH"
