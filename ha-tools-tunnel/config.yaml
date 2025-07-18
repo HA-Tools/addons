@@ -1,11 +1,12 @@
 name: "HA-Tools Tunnel"
-version: "1.0.18"
+version: "1.0.19"
 slug: "frpc_tunnel"
 description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
 boot: auto
 init: false
 ingress: false
+host_network: true
 
 options:
   server_addr: "ha-cloud.example.com"
