@@ -1,7 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache curl tar bash gettext
-
+RUN apk add --no-cache curl tar bash gettext jq
 ENV FRP_VERSION=0.58.0
 
 # Architektur erkennen & Binary laden
