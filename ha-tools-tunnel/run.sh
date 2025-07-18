@@ -2,10 +2,9 @@
 
 CONFIG_PATH=/data/frpc.ini
 
-# Rendere Config aus Jinja2 Template
-echo "Generiere FRPC-Konfiguration..."
-mkdir -p /data
-envsubst < /frpc.ini.j2 > $CONFIG_PATH
+export server_addr="${SERVER_ADDR}"
+export server_port="${SERVER_PORT}"
+export subdomain="${SUBDOMAIN}"
 
-echo "Starte frpc..."
+envsubst < /frpc.ini.j2 > $CONFIG_PATH
 exec frpc -c $CONFIG_PATH
