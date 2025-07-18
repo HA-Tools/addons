@@ -1,9 +1,9 @@
-serverAddr: "$SERVER_ADDR"
-serverPort: $SERVER_PORT
+serverAddr: "${SERVER_ADDR}"
+serverPort: ${SERVER_PORT}
 
 proxies:
   - name: ha-ui
     type: http
     localPort: 8123
     customDomains:
-      - "$SUBDOMAIN.$SERVER_ADDR"
+      - "${SUBDOMAIN}.${SERVER_ADDR}"
