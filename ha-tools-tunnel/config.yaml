@@ -1,16 +1,25 @@
-name: "FRPC Tunnel Client"
-version: "1.0.0"
-slug: "frpc_tunnel"
-description: "Ermöglicht eine sichere Verbindung zu einem FRP-Server für Remote-Zugriff auf Home Assistant."
-startup: services
-boot: auto
-init: false
-ingress: false
+name: "Sweet Home 3D for YHDT card"
+description: "Sweet Home 3D for Your Home Digital Twin Card (aka floor3d-card)"
+slug: "sh3d-ha"
+version: "0.0.28"
+codenotary: adizanni@gmail.com
+#ingress: true
+#ingress_port: 8080
+#ingress_entry: "sweethome3djsha/"
+host_network: true
+webui: http://[HOST]:[PORT:8080]/sweethome3djsha
+map:
+  - share:rw
+  - homeassistant_config:rw
+arch:
+  - amd64
+  - aarch64
 options:
-  server_addr: "ha-cloud.example.com"
-  server_port: 7000
-  subdomain: "ha-meinname"
+  model_folder: homes
+  export_to_HA_folder: homes
+  resources_folder: user
 schema:
-  server_addr: str
-  server_port: int
-  subdomain: str
+  model_folder: str
+  export_to_HA_folder: str
+  resources_folder: str
+image: adizanni/sh3d-ha-addon-{arch}
