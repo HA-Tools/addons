@@ -21,9 +21,8 @@ serverPort: ${SERVER_PORT}
 
 proxies:
   - name: ha-ui
-    type: tcp
+    type: http
     localPort: 8123
-    remotePort: 6000
     customDomains:
       - "${SUBDOMAIN}.${SERVER_ADDR}"
 EOF
