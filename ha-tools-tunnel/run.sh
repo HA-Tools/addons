@@ -7,7 +7,8 @@ echo "  server_addr: $SERVER_ADDR"
 echo "  server_port: $SERVER_PORT"
 echo "  subdomain:   $SUBDOMAIN"
 
-envsubst < /frpc.yaml.j2 > $CONFIG_PATH
+# explizite Ersetzung nur dieser Variablen:
+envsubst '$SERVER_ADDR $SERVER_PORT $SUBDOMAIN' < /frpc.yaml.j2 > $CONFIG_PATH
 
 echo "-------- Generierte frpc.yaml --------"
 cat $CONFIG_PATH
