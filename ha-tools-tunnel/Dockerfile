@@ -1,14 +1,12 @@
 FROM alpine:latest
-
 RUN apk add --no-cache curl tar bash gettext jq
-
 ENV FRP_VERSION=0.58.0
 
-# Architektur erkennen & Binary laden
+# Architektur ermitteln & Binary laden
 RUN ARCH=$(uname -m) && \
     case "$ARCH" in \
-      x86_64)   PLATFORM="amd64" ;; \
-      aarch64)  PLATFORM="arm64" ;; \
+      x86_64) PLATFORM="amd64" ;; \
+      aarch64) PLATFORM="arm64" ;; \
       armv7l|armv7) PLATFORM="arm" ;; \
       *) echo "Unsupported arch: $ARCH" && exit 1 ;; \
     esac && \
