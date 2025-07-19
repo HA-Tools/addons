@@ -3,37 +3,31 @@ set -euo pipefail
 
 OPTIONS_FILE=/data/options.json
 CONFIG_PATH=/data/frpc.yaml
+DEFAULT_PORT=8123
 
 INSTANCE_ID=$(jq -r '.instance_id' "$OPTIONS_FILE")
 
-# Finde den Home Assistant Container dynamisch
-CONTAINER_ID=$(docker ps --filter "ancestor=homeassistant/home-assistant" --format "{{.ID}}" | head -n1)
-if [ -z "$CONTAINER_ID" ]; then
-  echo "Fehler: Home Assistant Container nicht gefunden!"
-  exit 1
+# Versuche, Port aus configuration.yaml zu lesen
+if grep -sq "server_port:" /config/configuration.yaml; then
+  LOCAL_PORT=$(grep -A1 "http:" /config/configuration.yaml | grep "server_port:" | awk '{print $2}')
+else
+  LOCAL_PORT=$DEFAULT_PORT
 fi
 
-# Extrahiere den HostPort für 8123/tcp
-LOCAL_PORT=$(docker inspect "$CONTAINER_ID" \
-  --format '{{(index .NetworkSettings.Ports "8123/tcp").0.HostPort}}')
+echo "ℹ️  Verwende Port: ${LOCAL_PORT} (Auto-Erkennung)"
 
-if [ -z "$LOCAL_PORT" ]; then
-  echo "Fehler: Port 8123/tcp nicht gemappt?"
-  exit 1
-fi
-
-# Bereite FRP-Konfig
-FRP_TYPE=http
 cat > "$CONFIG_PATH" <<EOF
-[common]
-server_addr = tunnel.ha-tools.de
-server_port = 7000
-token = $INSTANCE_ID
+serverAddr: "ui.ha-tools.com"
+serverPort: 7000
 
-[ha]
-type = $FRP_TYPE
-local_port = $LOCAL_PORT
-subdomain = $INSTANCE_ID
+proxies:
+  - name: ha-ui
+    type: http
+    localIp: "127.0.0.1"
+    localPort: ${LOCAL_PORT}
+    customDomains:
+      - "${INSTANCE_ID}.ui.ha-tools.com"
+    hostHeaderRewrite: "${INSTANCE_ID}.ui.ha-tools.com"
 EOF
 
 exec frpc -c "$CONFIG_PATH"
