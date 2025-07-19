@@ -1,39 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Optionen
 OPTIONS_FILE=/data/options.json
-FRPC_CONFIG=/data/frpc.yaml
+CONFIG_PATH=/data/frpc.yaml
 
 INSTANCE_ID=$(jq -r '.instance_id' "$OPTIONS_FILE")
 
-# Prüfe Token
-if [ -z "${SUPERVISOR_TOKEN:-}" ]; then
-  echo "Fehler: SUPERVISOR_TOKEN fehlt!"
+# Finde den Home Assistant Container dynamisch
+CONTAINER_ID=$(docker ps --filter "ancestor=homeassistant/home-assistant" --format "{{.ID}}" | head -n1)
+if [ -z "$CONTAINER_ID" ]; then
+  echo "Fehler: Home Assistant Container nicht gefunden!"
   exit 1
 fi
 
-# Supervisor-API-Call
-HTTP_INFO=$(curl -s -H "Authorization: Bearer $SUPERVISOR_TOKEN" \
-    http://supervisor/core/api/http)
+# Extrahiere den HostPort für 8123/tcp
+LOCAL_PORT=$(docker inspect "$CONTAINER_ID" \
+  --format '{{(index .NetworkSettings.Ports "8123/tcp").0.HostPort}}')
 
-# Prüfen auf gültiges JSON
-if ! echo "$HTTP_INFO" | jq empty >/dev/null 2>&1; then
-  echo "Fehler: Supervisor-Antwort kein gültiges JSON:"
-  echo "$HTTP_INFO"
+if [ -z "$LOCAL_PORT" ]; then
+  echo "Fehler: Port 8123/tcp nicht gemappt?"
   exit 1
 fi
 
-# Werte extrahieren
-LOCAL_PORT=$(echo "$HTTP_INFO" | jq -r '.server_port')
-USE_SSL=$(echo "$HTTP_INFO" | jq -r '.use_ssl')
-
-# FRP-Protokoll wählen
+# Bereite FRP-Konfig
 FRP_TYPE=http
-[ "$USE_SSL" = "true" ] && FRP_TYPE=https
-
-# FRP-Konfig erstellen
-cat > "$FRPC_CONFIG" <<EOF
+cat > "$CONFIG_PATH" <<EOF
 [common]
 server_addr = tunnel.ha-tools.de
 server_port = 7000
@@ -45,4 +36,4 @@ local_port = $LOCAL_PORT
 subdomain = $INSTANCE_ID
 EOF
 
-exec frpc -c "$FRPC_CONFIG"
+exec frpc -c "$CONFIG_PATH"
