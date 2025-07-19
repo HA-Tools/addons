@@ -1,21 +1,21 @@
 name: "HA-Tools Tunnel"
-version: "1.0.32"
+version: "1.0.33"
 slug: "frpc_tunnel"
-description: "Reverse-Tunnel zum HA-Tools Server"
+description: "Reverse-Tunnel zum HA-Tools Server mit automatischer Port-Erkennung"
 startup: services
 boot: auto
 init: false
 ingress: false
 host_network: true
+homeassistant_api: true
+hassio_api: true
 
 options:
   instance_id: "kunde1"
-  local_port: 8123
 
 schema:
   instance_id: str
-  local_port: int
-  
+
 arch:
   - aarch64
   - amd64
