@@ -1,26 +1,21 @@
 name: "HA-Tools Tunnel"
-version: "1.0.35"
+version: "1.0.36"
 slug: "frpc_tunnel"
-description: "Reverse-Tunnel zum HA-Tools Server mit Port-Erkennung direkt per Docker"
+description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
 boot: auto
 init: false
 ingress: false
 host_network: true
-homeassistant_api: true
-hassio_api: true
-apparmor: false
-privileged: true
-docker_api: true
-map:
-  - "/var/run/docker.sock:/var/run/docker.sock:ro"
-  - "/proc:/host/proc:ro"
 
 options:
   instance_id: "kunde1"
 
 schema:
   instance_id: str
+
+map:
+  - config:ro
 
 arch:
   - aarch64
