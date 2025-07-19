@@ -1,8 +1,8 @@
 FROM alpine:latest
-RUN apk add --no-cache curl tar bash gettext jq
+RUN apk add --no-cache curl tar bash gettext jq docker-cli
+
 ENV FRP_VERSION=0.58.0
 
-# Architektur ermitteln & Binary laden
 RUN ARCH=$(uname -m) && \
     case "$ARCH" in \
       x86_64) PLATFORM="amd64" ;; \
