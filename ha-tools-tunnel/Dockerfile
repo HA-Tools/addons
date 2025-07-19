@@ -4,6 +4,7 @@ RUN apk add --no-cache curl tar bash gettext jq
 
 ENV FRP_VERSION=0.58.0
 
+# Architektur erkennen & Binary laden
 RUN ARCH=$(uname -m) && \
     case "$ARCH" in \
       x86_64)   PLATFORM="amd64" ;; \
