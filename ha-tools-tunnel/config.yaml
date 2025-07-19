@@ -1,5 +1,5 @@
 name: "HA-Tools Tunnel"
-version: "1.0.30"
+version: "1.0.31"
 slug: "frpc_tunnel"
 description: "Reverse-Tunnel zum HA-Tools Server"
 startup: services
