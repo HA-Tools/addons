@@ -14,7 +14,7 @@ serverPort: 7000
 
 proxies:
   - name: ha-ui
-    type: https
+    type: http
     localIp: "127.0.0.1"
     localPort: ${LOCAL_PORT}
     customDomains:
